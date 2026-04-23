@@ -3,15 +3,14 @@ import api from '@/services/api';
 
 export const useFeedStore = defineStore('feed', {
   state: () => ({
-    postsById: {},      // Dicionário para acesso rápido { [id]: post }
-    feedOrder: [],      // Array de IDs para manter a ordem cronológica
+    postsById: {},
+    feedOrder: [],
     nextCursor: null,
     isLoading: false,
   }),
 
   getters: {
     feedPosts: (state) => state.feedOrder.map(id => state.postsById[id]),
-    getPostById: (state) => (id) => state.postsById[id],
   },
 
   actions: {
@@ -19,12 +18,14 @@ export const useFeedStore = defineStore('feed', {
       this.isLoading = true;
       try {
         const { data } = await api.get('/feed');
-        // Limpa estado anterior no carregamento inicial
+        
         this.postsById = {};
         this.feedOrder = [];
         
         this.processPosts(data.data);
         this.nextCursor = data.next_cursor;
+      } catch (error) {
+        console.error("Erro ao buscar feed:", error);
       } finally {
         this.isLoading = false;
       }
@@ -32,18 +33,20 @@ export const useFeedStore = defineStore('feed', {
 
     async loadMoreFeed() {
       if (!this.nextCursor || this.isLoading) return;
-      
       this.isLoading = true;
       try {
         const { data } = await api.get(`/feed?cursor=${this.nextCursor}`);
         this.processPosts(data.data);
         this.nextCursor = data.next_cursor;
+      } catch (error) {
+        console.error("Erro ao carregar mais:", error);
       } finally {
         this.isLoading = false;
       }
     },
 
     processPosts(posts) {
+      if (!posts || !Array.isArray(posts)) return;
       posts.forEach(post => {
         this.postsById[post.id] = post;
         if (!this.feedOrder.includes(post.id)) {
@@ -56,47 +59,38 @@ export const useFeedStore = defineStore('feed', {
       const post = this.postsById[postId];
       if (!post) return;
 
-      // --- Atualização Otimista ---
       const previouslyLiked = post.isLiked;
+      const previousCount = post.likesCount;
+
       post.isLiked = !previouslyLiked;
       post.likesCount += post.isLiked ? 1 : -1;
 
       try {
         if (previouslyLiked) {
-          await api.delete(`/posts/${postId}/unlike`);
+          await api.delete(`/posts/${postId}/like`);
         } else {
           await api.post(`/posts/${postId}/like`);
         }
       } catch (error) {
-        // Reverte em caso de erro na API
         post.isLiked = previouslyLiked;
-        post.likesCount += previouslyLiked ? 1 : -1;
-      }
-    },
-
-    async addComment(postId, body) {
-      const { data } = await api.post(`/posts/${postId}/comments`, { body });
-      const post = this.postsById[postId];
-      if (post) {
-        // Assume que o post tem uma lista de comentários ou incrementa contador
-        if (!post.comments) post.comments = [];
-        post.comments.push(data);
-        post.commentsCount++;
+        post.likesCount = previousCount;
+        console.error("Erro no like:", error);
       }
     },
 
     async createPost(formData) {
-      const { data } = await api.post('/posts', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      // Adiciona o novo post no topo do feed
-      this.postsById[data.id] = data;
-      this.feedOrder.unshift(data.id);
-    },
-
-    removePost(postId) {
-      delete this.postsById[postId];
-      this.feedOrder = this.feedOrder.filter(id => id !== postId);
+      try {
+        // Envia para a API e deixa ela processar
+        const response = await api.post('/posts', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        
+        // Retornamos apenas para sinalizar sucesso no componente
+        return response.data;
+      } catch (error) {
+        console.error("Erro ao criar post:", error);
+        throw error;
+      }
     }
   },
 });
