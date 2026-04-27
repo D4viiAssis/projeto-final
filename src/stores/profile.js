@@ -9,66 +9,84 @@ export const useProfileStore = defineStore('profile', {
     isLoading: false,
   }),
   actions: {
-    // Busca o MEU perfil (Logado)
     async fetchMyProfile() {
-      const authStore = useAuthStore();
       this.isLoading = true;
       try {
+        // 1. Busca os dados do usuário logado
         const userRes = await api.get('/auth/me');
-        this.user = userRes.data;
+        const userData = userRes.data;
 
-        // Busca posts usando o MEU ID
-        const userId = authStore.user?.id;
-        if (userId) {
-          const postsRes = await api.get(`/users/${userId}/posts`);
-          this.posts = postsRes.data.data || postsRes.data;
-        }
+        // 2. Busca contadores reais (Se o back não mandar no objeto principal)
+        // Tentamos buscar as listas para contar manualmente, já que o back não entrega o total pronto
+        const [followersRes, followingRes, postsRes] = await Promise.all([
+          api.get(`/users/${userData.id}/followers`),
+          api.get(`/users/${userData.id}/following`),
+          api.get(`/users/${userData.id}/posts`)
+        ]);
+
+        userData.followers_count = followersRes.data.meta?.total || followersRes.data.length || 0;
+        userData.following_count = followingRes.data.meta?.total || followingRes.data.length || 0;
+        
+        this.user = userData;
+        this.posts = postsRes.data.data || postsRes.data;
       } catch (error) {
-        console.error("Erro ao carregar meu perfil:", error);
-        this.user = authStore.user;
-      } finally {
-        this.isLoading = false;
-      }
+        console.error("Erro no meu perfil:", error);
+      } finally { this.isLoading = false; }
     },
 
-    // NOVO: Busca o perfil de QUALQUER usuário pelo username
     async fetchUserProfile(username) {
       this.isLoading = true;
       try {
-        // 1. Busca os dados do usuário alvo
         const userRes = await api.get(`/users/${username}`);
-        this.user = userRes.data;
+        const userData = userRes.data;
 
-        // 2. Busca os posts desse usuário alvo usando o ID que veio na resposta
-        const postsRes = await api.get(`/users/${this.user.id}/posts`);
+        // BUSCA DA VERDADE: Como o UserResource é incompleto, buscamos tudo separado
+        const [followStatus, followersRes, followingRes, postsRes] = await Promise.all([
+          api.get(`/users/${userData.id}/is-following`),
+          api.get(`/users/${userData.id}/followers`),
+          api.get(`/users/${userData.id}/following`),
+          api.get(`/users/${userData.id}/posts`)
+        ]);
+
+        userData.is_following = !!followStatus.data.is_following;
+        userData.followers_count = followersRes.data.meta?.total || followersRes.data.length || 0;
+        userData.following_count = followingRes.data.meta?.total || followingRes.data.length || 0;
+
+        this.user = userData;
         this.posts = postsRes.data.data || postsRes.data;
       } catch (error) {
-        console.error("Erro ao carregar perfil de terceiros:", error);
+        console.error("Erro ao carregar perfil:", error);
         this.user = null;
-      } finally {
-        this.isLoading = false;
-      }
+      } finally { this.isLoading = false; }
     },
 
-    // NOVO: Action para Seguir/Parar de seguir dentro do perfil
     async toggleFollow(userId) {
       if (!this.user) return;
       
       const originalState = this.user.is_following;
-      const originalCount = this.user.followers_count;
+      const originalCount = Number(this.user.followers_count) || 0;
 
-      // Otimista
+      // 1. UI Otimista
       this.user.is_following = !this.user.is_following;
-      this.user.followers_count += this.user.is_following ? 1 : -1;
+      this.user.followers_count = this.user.is_following ? originalCount + 1 : Math.max(0, originalCount - 1);
 
       try {
         if (this.user.is_following) {
           await api.post(`/users/${userId}/follow`);
         } else {
-          await api.delete(`/users/${userId}/unfollow`);
+          await api.delete(`/users/${userId}/follow`);
         }
+        
+        // 2. Após a ação, forçamos uma re-checagem dos contadores para garantir sincronia
+        const [followersCheck, followCheck] = await Promise.all([
+          api.get(`/users/${userId}/followers`),
+          api.get(`/users/${userId}/is-following`)
+        ]);
+        
+        this.user.followers_count = followersCheck.data.meta?.total || followersCheck.data.length || 0;
+        this.user.is_following = !!followCheck.data.is_following;
+
       } catch (error) {
-        // Reverte se der ruim
         this.user.is_following = originalState;
         this.user.followers_count = originalCount;
       }

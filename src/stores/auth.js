@@ -8,7 +8,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!token.value);
 
-  // Inicializa a store lendo o localStorage
   const init = async () => {
     const savedToken = localStorage.getItem('instaclone.token');
     if (savedToken) {
@@ -25,7 +24,6 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const register = async (userData) => {
-    // userData deve conter: name, username, email, password, password_confirmation
     const { data } = await api.post('/auth/register', userData);
     token.value = data.access_token;
     user.value = data.user;
@@ -36,7 +34,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       await api.post('/auth/logout');
     } catch (error) {
-      // Falha silenciosa se o token já expirou
+      // Falha silenciosa
     } finally {
       localStorage.removeItem('instaclone.token');
       token.value = null;
@@ -53,18 +51,29 @@ export const useAuthStore = defineStore('auth', () => {
     }
   };
 
- const updateProfile = async (formData) => {
+  // ROTA 1: Atualiza Nome e Bio (PUT)
+  const updateProfile = async (profileData) => {
     try {
-      // O Laravel geralmente espera POST com _method=PUT para upload de arquivos em updates
-      if (!(formData instanceof FormData)) {
-        throw new Error("Dados devem ser FormData");
-      }
-      
-      const { data } = await api.post('/auth/me', formData); 
-      user.value = data; // Atualiza o usuário globalmente
+      const { data } = await api.put('/users/me', profileData);
+      user.value = data; 
       return data;
     } catch (error) {
-      console.error("Erro ao atualizar perfil:", error);
+      console.error("Erro ao atualizar textos:", error);
+      throw error;
+    }
+  };
+
+  // ROTA 2: Atualiza apenas o Avatar (POST)
+  const updateAvatar = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      
+      const { data } = await api.post('/users/me/avatar', formData);
+      user.value = data; 
+      return data;
+    } catch (error) {
+      console.error("Erro ao fazer upload do avatar:", error);
       throw error;
     }
   };
@@ -78,6 +87,7 @@ export const useAuthStore = defineStore('auth', () => {
     register,
     logout,
     fetchMe,
-    updateProfile
+    updateProfile,
+    updateAvatar
   };
 });

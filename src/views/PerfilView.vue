@@ -9,7 +9,6 @@ const route = useRoute();
 const profileStore = useProfileStore();
 const authStore = useAuthStore();
 
-// Checa se o perfil que estou vendo é o meu
 const isOwnProfile = computed(() => {
   const usernameQuery = route.query.user;
   return !usernameQuery || usernameQuery === authStore.user?.username;
@@ -17,21 +16,14 @@ const isOwnProfile = computed(() => {
 
 const loadProfile = async () => {
   const username = route.query.user;
-  
   if (isOwnProfile.value) {
-    // Se não tem query ou é meu nome, busca meu perfil
     await profileStore.fetchMyProfile();
   } else {
-    // Se tem query de outro usuário, busca o perfil dele
-    // Certifique-se de que essa função fetchUserProfile existe na sua store!
     await profileStore.fetchUserProfile(username);
   }
 };
 
 onMounted(loadProfile);
-
-// Crucial: Se eu estiver no perfil do "João" e clicar no meu perfil na navbar,
-// a URL muda mas o componente não recarrega. O watch resolve isso.
 watch(() => route.query.user, loadProfile);
 
 const handleFollow = async () => {
@@ -41,7 +33,6 @@ const handleFollow = async () => {
 
 <template>
   <div class="container py-4" style="max-width: 935px;">
-    
     <div v-if="profileStore.isLoading" class="text-center py-5">
       <Spinner size="lg" />
     </div>
@@ -51,29 +42,20 @@ const handleFollow = async () => {
         <div class="col-4 text-center">
           <div class="avatar-container mx-auto">
             <img 
-              :src="profileStore.user.profile_photo_url || 'https://ui-avatars.com/api/?name=' + profileStore.user.name" 
+              :src="profileStore.user.avatar_url || 'https://ui-avatars.com/api/?name=' + profileStore.user.name" 
               class="rounded-circle img-thumbnail"
               style="width: 150px; height: 150px; object-fit: cover;"
             />
           </div>
         </div>
         
-        <div class="col-8">
+        <div class="col-8 text-start">
           <div class="d-flex align-items-center gap-3 mb-3">
             <h2 class="h4 mb-0">{{ profileStore.user.username }}</h2>
-            
-            <router-link 
-              v-if="isOwnProfile" 
-              to="/perfil/editar" 
-              class="btn btn-sm btn-outline-dark fw-bold text-decoration-none">
+            <router-link v-if="isOwnProfile" to="/perfil/editar" class="btn btn-sm btn-outline-dark fw-bold text-decoration-none">
               Editar Perfil
             </router-link>
-            <button 
-              v-else 
-              @click="handleFollow"
-              class="btn btn-sm fw-bold"
-              :class="profileStore.user.is_following ? 'btn-outline-secondary' : 'btn-primary'"
-            >
+            <button v-else @click="handleFollow" class="btn btn-sm fw-bold" :class="profileStore.user.is_following ? 'btn-outline-secondary' : 'btn-primary'">
               {{ profileStore.user.is_following ? 'Seguindo' : 'Seguir' }}
             </button>
           </div>
@@ -84,29 +66,19 @@ const handleFollow = async () => {
             <span><strong>{{ profileStore.user.following_count || 0 }}</strong> seguindo</span>
           </div>
 
-          <p class="fw-bold mb-0">{{ profileStore.user.name }}</p>
-          <p class="text-muted">{{ profileStore.user.bio || 'Bio do InstaClone 🚀' }}</p>
+          <p class="fw-bold mb-0 text-start">{{ profileStore.user.name }}</p>
+          <p class="text-muted text-start">{{ profileStore.user.bio || 'Bio do InstaClone 🚀' }}</p>
         </div>
       </header>
 
       <div class="row g-2">
-        <div 
-          v-for="post in profileStore.posts" 
-          :key="post.id" 
-          class="col-4"
-        >
+        <div v-for="post in profileStore.posts" :key="post.id" class="col-4">
           <router-link :to="`/posts/${post.id}`" class="d-block ratio ratio-1x1 border">
-            <img 
-              :src="post.image_url" 
-              class="object-fit-cover"
-              alt="Post"
-            />
+            <img :src="post.image_url" class="object-fit-cover" alt="Post" />
           </router-link>
         </div>
-        
         <div v-if="profileStore.posts.length === 0" class="text-center py-5 text-muted">
-          <i class="bi bi-camera h1 d-block"></i>
-          Ainda não há publicações.
+          <i class="bi bi-camera h1 d-block"></i> Ainda não há publicações.
         </div>
       </div>
     </div>
@@ -114,9 +86,5 @@ const handleFollow = async () => {
 </template>
 
 <style scoped>
-.object-fit-cover {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-}
+.object-fit-cover { object-fit: cover; width: 100%; height: 100%; }
 </style>

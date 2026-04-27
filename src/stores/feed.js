@@ -8,16 +8,12 @@ export const useFeedStore = defineStore('feed', () => {
   const nextCursor = ref(null);
   const isLoading = ref(false);
 
-  // Getters
   const feedPosts = computed(() => feedOrder.value.map(id => postsById.value[id]));
-  const getPostById = (id) => computed(() => postsById.value[id]);
 
-  // Actions
   const fetchFeed = async () => {
     isLoading.value = true;
     try {
       const { data } = await api.get('/feed');
-      // Normalização
       const posts = data.data || data;
       posts.forEach(post => {
         postsById.value[post.id] = post;
@@ -29,77 +25,48 @@ export const useFeedStore = defineStore('feed', () => {
     }
   };
 
-  const loadMoreFeed = async () => {
-    if (!nextCursor.value) return;
-    try {
-      const { data } = await api.get(`/feed?cursor=${nextCursor.value}`);
-      const posts = data.data || data;
-      posts.forEach(post => {
-        postsById.value[post.id] = post;
-      });
-      feedOrder.value.push(...posts.map(p => p.id));
-      nextCursor.value = data.next_cursor || null;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const toggleLike = async (postId) => {
     const post = postsById.value[postId];
     if (!post) return;
 
-    // Atualização otimista
-    const originalIsLiked = post.isLiked;
-    const originalLikesCount = post.likesCount;
+    // Atualização otimista usando os nomes do SEU backend
+    const originalLikedByMe = post.liked_by_me;
+    const originalLikesCount = post.likes_count || 0;
 
-    post.isLiked = !post.isLiked;
-    post.likesCount += post.isLiked ? 1 : -1;
+    post.liked_by_me = !post.liked_by_me;
+    post.likes_count = post.liked_by_me ? originalLikesCount + 1 : originalLikesCount - 1;
 
     try {
-      if (post.isLiked) {
+      if (post.liked_by_me) {
         await api.post(`/posts/${postId}/like`);
       } else {
-        await api.delete(`/posts/${postId}/unlike`);
+        // Conforme seu api.php, o unlike é DELETE
+        await api.delete(`/posts/${postId}/like`);
       }
     } catch (error) {
       // Reverte em caso de erro
-      post.isLiked = originalIsLiked;
-      post.likesCount = originalLikesCount;
+      post.liked_by_me = originalLikedByMe;
+      post.likes_count = originalLikesCount;
     }
   };
 
   const addComment = async (postId, body) => {
-    const { data } = await api.post(`/posts/${postId}/comments`, { body });
-    const post = postsById.value[postId];
-    if (post) {
-      if (!post.comments) post.comments = [];
-      post.comments.unshift(data);
+    try {
+      const { data } = await api.post(`/posts/${postId}/comments`, { body });
+      const post = postsById.value[postId];
+      if (post) {
+        // Incrementa o contador de comentários
+        post.comments_count = (post.comments_count || 0) + 1;
+      }
+      return data;
+    } catch (error) {
+      console.error("Erro ao comentar:", error);
+      throw error;
     }
   };
 
-  const createPost = async (formData) => {
-    const { data } = await api.post('/posts', formData);
-    postsById.value[data.id] = data;
-    feedOrder.value.unshift(data.id);
-  };
-
-  const removePost = (postId) => {
-    delete postsById.value[postId];
-    feedOrder.value = feedOrder.value.filter(id => id !== postId);
-  };
-
   return {
-    postsById,
-    feedOrder,
-    nextCursor,
-    isLoading,
-    feedPosts,
-    getPostById,
-    fetchFeed,
-    loadMoreFeed,
-    toggleLike,
-    addComment,
-    createPost,
-    removePost
+    postsById, feedOrder, nextCursor, isLoading, feedPosts,
+    fetchFeed, toggleLike, addComment
   };
 });
