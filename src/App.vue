@@ -1,18 +1,18 @@
 <script setup>
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
 import AuthLayout from '@/layouts/AuthLayout.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
-const route = useRoute();
-const layouts = { AuthLayout, AppLayout };
+const authStore = useAuthStore();
 
-// Pega o layout definido na rota (ou um default se não existir)
-const layout = computed(() => layouts[route.meta.layout] || 'div');
+onMounted(() => {
+  authStore.init();
+});
 </script>
 
 <template>
-  <component :is="layout">
+  <component :is="$route.meta.layout === 'AuthLayout' ? AuthLayout : AppLayout">
     <router-view v-slot="{ Component }">
       <transition name="fade" mode="out-in">
         <component :is="Component" />
@@ -20,3 +20,15 @@ const layout = computed(() => layouts[route.meta.layout] || 'div');
     </router-view>
   </component>
 </template>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

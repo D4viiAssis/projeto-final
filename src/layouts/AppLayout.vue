@@ -1,21 +1,33 @@
-<script setup>
-import Navbar from '@/components/Navbar.vue';
-</script>
-
 <template>
-  <div class="app-container">
+  <div class="app-layout">
     <Navbar />
-    <main class="main-content">
+    <main class="main-content min-vh-100">
       <slot />
     </main>
   </div>
 </template>
 
+<script setup>
+import Navbar from '@/components/Navbar.vue';
+</script>
+
 <style scoped>
-@media (min-width: 768px) {
-  .main-content { margin-left: 245px; padding: 30px; }
+.app-layout {
+  display: flex;
 }
+
+.main-content {
+  flex: 1;
+  /* Garante que o conteúdo não fique embaixo da sidebar no Desktop */
+  margin-left: 250px; 
+  background-color: var(--color-bg);
+}
+
+/* Ajuste para Mobile */
 @media (max-width: 767px) {
-  .main-content { padding-bottom: 70px; }
+  .main-content {
+    margin-left: 0;
+    padding-bottom: 60px; /* Espaço para a barra inferior */
+  }
 }
 </style>

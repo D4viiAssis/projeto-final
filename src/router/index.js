@@ -8,38 +8,48 @@ const routes = [
   },
   {
     path: '/login',
-    name: 'login',
     component: () => import('@/views/auth/LoginView.vue'),
-    meta: { requiresGuest: true, layout: 'AuthLayout' }
+    meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/cadastro',
-    name: 'cadastro',
     component: () => import('@/views/auth/CadastroView.vue'),
-    meta: { requiresGuest: true, layout: 'AuthLayout' }
+    meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/feed',
-    name: 'feed',
     component: () => import('@/views/FeedView.vue'),
-    meta: { requiresAuth: true, layout: 'AppLayout' }
+    meta: { layout: 'AppLayout', requiresAuth: true }
   },
-  // As outras rotas abaixo darão erro enquanto não criarmos os arquivos nas views,
-  // mas já deixamos o contrato pronto aqui.
   {
     path: '/descobrir',
     component: () => import('@/views/DescubrirView.vue'),
-    meta: { requiresAuth: true, layout: 'AppLayout' }
+    meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/criar',
     component: () => import('@/views/CriarPostView.vue'),
-    meta: { requiresAuth: true, layout: 'AppLayout' }
+    meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil',
     component: () => import('@/views/PerfilView.vue'),
-    meta: { requiresAuth: true, layout: 'AppLayout' }
+    meta: { layout: 'AppLayout', requiresAuth: true }
+  },
+  {
+    path: '/perfil/editar',
+    component: () => import('@/views/EditarPerfilView.vue'),
+    meta: { layout: 'AppLayout', requiresAuth: true }
+  },
+  {
+    path: '/perfil/lista/:type',
+    component: () => import('@/views/ListaConexoesView.vue'),
+    meta: { layout: 'AppLayout', requiresAuth: true }
+  },
+  {
+    path: '/posts/:postId',
+    component: () => import('@/views/PostDetailView.vue'),
+    meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -48,22 +58,24 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(),
   routes
 });
 
+// Guards de Segurança
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   
-  if (authStore.token && !authStore.user) {
+  // Se a store ainda não foi inicializada (F5), inicializa agora
+  if (!authStore.user && localStorage.getItem('instaclone.token')) {
     await authStore.init();
   }
 
-  const isAuthenticated = authStore.isAuthenticated;
+  const isAuth = authStore.isAuthenticated;
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
+  if (to.meta.requiresAuth && !isAuth) {
     next('/login');
-  } else if (to.meta.requiresGuest && isAuthenticated) {
+  } else if (to.meta.requiresGuest && isAuth) {
     next('/feed');
   } else {
     next();

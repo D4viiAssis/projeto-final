@@ -1,14 +1,21 @@
 <template>
-  <div class="auth-wrapper">
-    <div class="auth-container">
-      <h1 class="logo-text">InstaClone</h1>
+  <div class="auth-container d-flex align-items-center justify-content-center min-vh-100 bg-light">
+    <div class="auth-card p-4 bg-white border rounded shadow-sm" style="width: 100%; max-width: 350px;">
+      <div class="text-center mb-4">
+        <h1 class="instagram-logo">InstaClone</h1>
+      </div>
       <slot />
     </div>
   </div>
 </template>
 
 <style scoped>
-.auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--color-bg); }
-.auth-container { background: var(--color-surface); padding: 40px; border: 1px solid var(--color-border); width: 100%; max-width: 350px; text-align: center; }
-.logo-text { font-weight: bold; margin-bottom: 30px; background: linear-gradient(45deg, var(--color-gradient-start), var(--color-gradient-end)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.instagram-logo {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+  background: linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: 2.5rem;
+}
 </style>
