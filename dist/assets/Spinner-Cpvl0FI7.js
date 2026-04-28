@@ -1,0 +1,1 @@
+import{f as e,l as t,x as n}from"./api-CDB93czu.js";import{a as r}from"./index-STMFbWkY.js";var i={},a={class:`spinner-border spinner-border-sm`,role:`status`};function o(r,i){return n(),e(`div`,a,[...i[0]||=[t(`span`,{class:`visually-hidden`},`Carregando...`,-1)]])}var s=r(i,[[`render`,o]]);export{s as t};

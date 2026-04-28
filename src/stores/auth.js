@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import api from '@/services/api';
+import { authService } from '@/services/auth.service';
+import { useFollowsStore } from '@/stores/follows';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null);
@@ -13,18 +14,22 @@ export const useAuthStore = defineStore('auth', () => {
     if (savedToken) {
       token.value = savedToken;
       await fetchMe();
+      if (user.value) {
+        const followsStore = useFollowsStore();
+        await followsStore.fetchFollowingList(user.value.id);
+      }
     }
   };
 
   const login = async (email, password) => {
-    const { data } = await api.post('/auth/login', { email, password });
+    const data = await authService.login({ email, password });
     token.value = data.access_token;
     user.value = data.user;
     localStorage.setItem('instaclone.token', data.access_token);
   };
 
   const register = async (userData) => {
-    const { data } = await api.post('/auth/register', userData);
+    const data = await authService.register(userData);
     token.value = data.access_token;
     user.value = data.user;
     localStorage.setItem('instaclone.token', data.access_token);
@@ -32,7 +37,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await authService.logout();
     } catch (error) {
       // Falha silenciosa
     } finally {
@@ -44,8 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const fetchMe = async () => {
     try {
-      const { data } = await api.get('/auth/me');
-      user.value = data;
+      user.value = await authService.fetchMe();
     } catch (error) {
       await logout();
     }
@@ -54,9 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
   // ROTA 1: Atualiza Nome e Bio (PUT)
   const updateProfile = async (profileData) => {
     try {
-      const { data } = await api.put('/users/me', profileData);
-      user.value = data; 
-      return data;
+      user.value = await authService.updateProfile(profileData);
+      return user.value;
     } catch (error) {
       console.error("Erro ao atualizar textos:", error);
       throw error;
@@ -66,12 +69,8 @@ export const useAuthStore = defineStore('auth', () => {
   // ROTA 2: Atualiza apenas o Avatar (POST)
   const updateAvatar = async (file) => {
     try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-      
-      const { data } = await api.post('/users/me/avatar', formData);
-      user.value = data; 
-      return data;
+      user.value = await authService.updateAvatar(file);
+      return user.value;
     } catch (error) {
       console.error("Erro ao fazer upload do avatar:", error);
       throw error;

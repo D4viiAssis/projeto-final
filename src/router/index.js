@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { ROUTE_NAMES } from './routeNames';
 
 const routes = [
   {
@@ -8,47 +9,56 @@ const routes = [
   },
   {
     path: '/login',
+    name: ROUTE_NAMES.LOGIN, // <--- Adicionado
     component: () => import('@/views/auth/LoginView.vue'),
     meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/cadastro',
+    name: ROUTE_NAMES.REGISTER, // <--- Adicionado
     component: () => import('@/views/auth/CadastroView.vue'),
     meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/feed',
-    component: () => import('@/views/FeedView.vue'),
+    name: ROUTE_NAMES.FEED, // <--- Adicionado
+    component: () => import('@/views/app/FeedView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/descobrir',
-    component: () => import('@/views/DescubrirView.vue'),
+    name: ROUTE_NAMES.DISCOVER, // <--- Adicionado
+    component: () => import('@/views/app/DescubrirView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/criar',
-    component: () => import('@/views/CriarPostView.vue'),
+    name: ROUTE_NAMES.CREATE, // <--- Adicionado
+    component: () => import('@/views/app/CriarPostView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil',
-    component: () => import('@/views/PerfilView.vue'),
+    name: ROUTE_NAMES.PROFILE, // <--- Adicionado
+    component: () => import('@/views/app/PerfilView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil/editar',
-    component: () => import('@/views/EditarPerfilView.vue'),
+    name: ROUTE_NAMES.EDIT_PROFILE, // <--- O QUE ESTAVA DANDO ERRO!
+    component: () => import('@/views/app/EditarPerfilView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil/lista/:type',
-    component: () => import('@/views/ListaConexoesView.vue'),
+    name: ROUTE_NAMES.PROFILE_CONNECTIONS, // <--- Adicionado
+    component: () => import('@/views/app/ListaConexoesView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/posts/:postId',
-    component: () => import('@/views/PostDetailView.vue'),
+    name: ROUTE_NAMES.POST_DETAILS, // <--- Adicionado
+    component: () => import('@/views/app/PostDetailView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
@@ -66,7 +76,6 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   
-  // Se a store ainda não foi inicializada (F5), inicializa agora
   if (!authStore.user && localStorage.getItem('instaclone.token')) {
     await authStore.init();
   }

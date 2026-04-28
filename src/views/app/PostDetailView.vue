@@ -5,6 +5,7 @@ import { useFeedStore } from '@/stores/feed';
 import api from '@/services/api';
 import Avatar from '@/components/ui/Avatar.vue';
 import Spinner from '@/components/ui/Spinner.vue';
+import PostCommentItem from '@/components/feed/PostCommentItem.vue';
 import { formatCount } from '@/utils/format';
 import { timeAgo } from '@/utils/date';
 
@@ -64,7 +65,6 @@ const handleComment = async () => {
     const { data } = await api.post(`/posts/${post.value.id}/comments`, {
       body: commentBody.value
     });
-    // Adiciona o novo comentário no topo da lista
     comments.value.unshift(data);
     commentBody.value = '';
     if (post.value) post.value.comments_count++;
@@ -72,6 +72,16 @@ const handleComment = async () => {
     alert('Erro ao publicar comentário');
   } finally {
     isSubmitting.value = false;
+  }
+};
+
+const handleDeleteComment = async (commentId) => {
+  try {
+    await api.delete(`/comments/${commentId}`);
+    comments.value = comments.value.filter(comment => comment.id !== commentId);
+    if (post.value) post.value.comments_count = Math.max(0, post.value.comments_count - 1);
+  } catch (error) {
+    alert('Erro ao excluir comentário');
   }
 };
 </script>
@@ -108,21 +118,11 @@ const handleComment = async () => {
 
             <hr v-if="post.caption && comments.length > 0">
 
-            <div v-for="comment in comments" :key="comment.id" class="d-flex mb-3">
-              <router-link :to="`/perfil?user=${comment.user.username}`">
-                <img 
-                  :src="comment.user.avatar_url || 'https://ui-avatars.com/api/?name=' + comment.user.name" 
-                  class="rounded-circle border me-2" 
-                  style="width: 28px; height: 28px; object-fit: cover;"
-                />
-              </router-link>
-              <div class="text-start">
-                <span class="fw-bold me-2">{{ comment.user.username }}</span>
-                <span class="text-break">{{ comment.body }}</span>
-                <div class="text-muted mt-1" style="font-size: 0.75rem;">
-                  {{ timeAgo(comment.created_at) }}
-                </div>
-              </div>
+            <div v-for="comment in comments" :key="comment.id" class="mb-3">
+              <PostCommentItem
+                :comment="comment"
+                @delete="handleDeleteComment"
+              />
             </div>
 
             <div v-if="comments.length === 0" class="text-center py-4 text-muted italic">
