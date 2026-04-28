@@ -11,9 +11,7 @@ export const useFeedStore = defineStore('feed', () => {
 
   const feedPosts = computed(() => feedOrder.value.map(id => postsById.value[id]));
 
-  /**
-   * Normaliza um comentário para garantir que ele tenha todos os campos necessários
-   */
+
   const normalizeComment = (comment) => ({
     id: comment.id,
     body: comment.body,

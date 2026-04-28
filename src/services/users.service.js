@@ -52,7 +52,6 @@ export const usersService = {
     const response = await api.post(`/users/${userId}/follow`);
     return response.data;
   },
-
   async unfollowUser(userId) {
     await api.delete(`/users/${userId}/follow`);
   }
