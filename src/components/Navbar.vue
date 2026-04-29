@@ -1,36 +1,37 @@
 <template>
   <nav class="custom-navbar">
     <div class="nav-content d-flex flex-column h-100">
-      <div class="logo d-none d-md-block mb-5 p-3">
+      <div class="logo-container p-3 mb-4">
         <h3 class="instagram-logo">InstaClone</h3>
+        <i class="bi bi-instagram logo-icon"></i>
       </div>
       
       <div class="nav-links flex-grow-1">
         <router-link to="/feed" class="nav-item">
-          <i class="bi bi-house-door icon"></i> 
-          <span class="label d-none d-md-inline">Home</span>
+          <div class="icon-wrapper"><i class="bi bi-house-door"></i></div>
+          <span class="label">Home</span>
         </router-link>
         
         <router-link to="/descobrir" class="nav-item">
-          <i class="bi bi-search icon"></i> 
-          <span class="label d-none d-md-inline">Buscar</span>
+          <div class="icon-wrapper"><i class="bi bi-search"></i></div>
+          <span class="label">Buscar</span>
         </router-link>
         
         <router-link to="/criar" class="nav-item">
-          <i class="bi bi-plus-square icon"></i> 
-          <span class="label d-none d-md-inline">Criar</span>
+          <div class="icon-wrapper"><i class="bi bi-plus-square"></i></div>
+          <span class="label">Criar</span>
         </router-link>
         
         <router-link to="/perfil" class="nav-item">
-          <i class="bi bi-person icon"></i> 
-          <span class="label d-none d-md-inline">Perfil</span>
+          <div class="icon-wrapper"><i class="bi bi-person"></i></div>
+          <span class="label">Perfil</span>
         </router-link>
       </div>
 
       <div class="nav-footer p-2 mb-md-3">
         <button @click="handleLogout" class="nav-item logout-btn w-100 border-0 bg-transparent">
-          <i class="bi bi-box-arrow-right icon"></i>
-          <span class="label d-none d-md-inline">Sair</span>
+          <div class="icon-wrapper"><i class="bi bi-box-arrow-right"></i></div>
+          <span class="label">Sair</span>
         </button>
       </div>
     </div>
@@ -53,84 +54,134 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
-.icon {
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-}
-
+/* Configurações Gerais */
 .custom-navbar {
   position: fixed;
   z-index: 100;
   background: white;
-  border-right: 1px solid var(--color-border);
+  border-right: 1px solid #dbdbdb;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-.instagram-logo {
-  font-weight: bold;
-  font-size: 1.5rem;
-  background: linear-gradient(to right, var(--color-gradient-start), var(--color-gradient-end));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+/* Layout Desktop (Sidebar que expande) */
 @media (min-width: 768px) {
   .custom-navbar {
     left: 0;
     top: 0;
-    width: 250px;
+    width: 75px; /* Largura fechada */
     height: 100vh;
   }
-  .nav-links {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0 10px;
-  }
-}
 
-@media (max-width: 767px) {
-  .custom-navbar {
-    bottom: 0;
-    left: 0;
-    width: 100%;
+  .custom-navbar:hover {
+    width: 250px; /* Largura aberta */
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.05);
+  }
+
+  .nav-links {
+    padding: 0 12px;
+  }
+
+  /* Controle da Logo */
+  .logo-container {
     height: 60px;
-    border-right: none;
-    border-top: 1px solid var(--color-border);
-  }
-  .nav-content { flex-direction: row !important; }
-  .nav-links {
     display: flex;
-    justify-content: space-around;
     align-items: center;
-    width: 100%;
+    position: relative;
   }
-  .nav-footer { display: none; } /* Esconde logout na barra de baixo pra não apertar sem querer */
+
+  .instagram-logo {
+    position: absolute;
+    left: 20px;
+    font-weight: bold;
+    font-size: 1.4rem;
+    opacity: 0; /* Escondida por padrão */
+    transition: opacity 0.2s ease;
+    white-space: nowrap;
+    background: linear-gradient(to right, #833ab4, #fd1d1d);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .logo-icon {
+    font-size: 1.6rem;
+    margin-left: 5px;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+  }
+
+  /* Quando a barra expande, troca ícone pelo texto da logo */
+  .custom-navbar:hover .instagram-logo { opacity: 1; }
+  .custom-navbar:hover .logo-icon { opacity: 0; }
+
+  /* Labels (Textos) */
+  .label {
+    opacity: 0;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+    font-size: 1rem;
+  }
+
+  .custom-navbar:hover .label {
+    opacity: 1;
+  }
 }
 
+/* Itens da Navegação */
 .nav-item {
   display: flex;
   align-items: center;
   gap: 15px;
   padding: 12px;
   text-decoration: none;
-  color: var(--color-text);
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  cursor: pointer;
+  color: #262626;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.1s;
+  margin-bottom: 5px;
+}
+
+.icon-wrapper {
+  min-width: 28px;
+  display: flex;
+  justify-content: center;
+  font-size: 1.5rem;
 }
 
 .nav-item:hover {
-  background-color: #f2f2f2;
-}
-
-/* Estilo específico do Logout */
-.logout-btn:hover {
-  background-color: #fff1f0;
-  color: #ff4d4f;
+  background-color: #fafafa;
+  transform: scale(1.05);
 }
 
 .nav-item.router-link-active {
   font-weight: bold;
+}
+
+.nav-item.router-link-active i {
+  -webkit-text-stroke: 1px black; /* Deixa o ícone "bold" quando ativo */
+}
+
+/* Estilo Mobile (Barra Inferior) */
+@media (max-width: 767px) {
+  .custom-navbar {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    border-top: 1px solid #dbdbdb;
+  }
+  .nav-content { flex-direction: row !important; }
+  .nav-links {
+    display: flex;
+    flex-direction: row !important;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+  }
+  .logo-container, .label, .nav-footer { display: none; }
+}
+
+.logout-btn:hover {
+  background-color: #fff1f0 !important;
+  color: #ff4d4f !important;
 }
 </style>

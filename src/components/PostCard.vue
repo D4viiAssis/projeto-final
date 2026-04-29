@@ -1,10 +1,8 @@
 <script setup>
 import { ref } from 'vue';
 import { useFeedStore } from '@/stores/feed';
-import Avatar from '@/components/ui/Avatar.vue';
 import { formatCount } from '@/utils/format';
 import { timeAgo } from '@/utils/date';
-// Importação do novo modal de curtidas
 import LikersModal from '@/components/LikersModal.vue';
 
 const props = defineProps({
@@ -14,8 +12,23 @@ const props = defineProps({
 const feedStore = useFeedStore();
 const commentBody = ref('');
 const isSubmittingComment = ref(false);
-// Estado para controlar a visibilidade do modal
 const showLikers = ref(false);
+const showCentralHeart = ref(false); // Controla o coração gigante no meio
+
+// Lógica de Double Tap
+let lastTap = 0;
+const handleDoubleTap = () => {
+  const now = Date.now();
+  if (now - lastTap < 300) {
+    if (!props.post.liked_by_me) {
+      handleLike();
+    }
+    // Sempre mostra a animação do coração no meio no double click
+    showCentralHeart.value = true;
+    setTimeout(() => { showCentralHeart.value = false; }, 1000);
+  }
+  lastTap = now;
+};
 
 const handleLike = () => {
   feedStore.toggleLike(props.post.id);
@@ -23,11 +36,10 @@ const handleLike = () => {
 
 const handleComment = async () => {
   if (!commentBody.value.trim() || isSubmittingComment.value) return;
-  
   isSubmittingComment.value = true;
   try {
     await feedStore.addComment(props.post.id, commentBody.value);
-    commentBody.value = ''; // Limpa o campo após comentar
+    commentBody.value = ''; 
   } catch (error) {
     alert('Erro ao enviar comentário');
   } finally {
@@ -37,71 +49,70 @@ const handleComment = async () => {
 </script>
 
 <template>
-  <div class="post-card mb-4">
-    <div class="post-header d-flex align-items-center justify-content-between">
+  <div class="post-container mb-4">
+    <div class="post-header d-flex align-items-center justify-content-between p-2 px-3">
       <router-link :to="`/perfil?user=${post.user.username}`" class="d-flex align-items-center text-decoration-none">
-        <img 
-          :src="post.user.avatar_url || 'https://ui-avatars.com/api/?name=' + post.user.name" 
-          class="avatar rounded-circle border me-3" 
-          alt="Avatar"
-        />
-        <div>
-          <div class="username mb-0">{{ post.user.username }}</div>
-          <div class="user-handle small text-muted">{{ post.user.name }}</div>
+        <div class="avatar-ring">
+          <img 
+            :src="post.user.avatar_url || 'https://ui-avatars.com/api/?name=' + post.user.name" 
+            class="avatar-img" 
+          />
+        </div>
+        <div class="ms-2">
+          <span class="username-text">{{ post.user.username }}</span>
         </div>
       </router-link>
-      <button class="btn-options btn-icon" type="button">
-        <i class="bi bi-three-dots"></i>
-      </button>
+      <button class="btn-more"><i class="bi bi-three-dots"></i></button>
     </div>
 
-    <div class="post-image">
-      <img :src="post.image_url" alt="Post image" />
+    <div class="post-image-wrapper" @click="handleDoubleTap">
+      <img :src="post.image_url" class="main-img" loading="lazy" />
+      
+      <Transition name="heart-fade">
+        <div v-if="showCentralHeart" class="central-heart">
+          <i class="bi bi-heart-fill"></i>
+        </div>
+      </Transition>
     </div>
 
-    <div class="post-body px-3 py-3">
-      <div class="action-row mb-3 d-flex align-items-center">
-        <button @click="handleLike" class="btn-icon icon-button" type="button">
-          <i v-if="post.liked_by_me" class="bi bi-heart-fill liked"></i>
+    <div class="post-metadata p-3 pt-2">
+      <div class="action-buttons d-flex align-items-center mb-2">
+        <button @click="handleLike" class="action-icon me-3">
+          <i :key="post.liked_by_me" v-if="post.liked_by_me" class="bi bi-heart-fill text-danger anim-pop"></i>
           <i v-else class="bi bi-heart"></i>
-          <span class="action-count">{{ formatCount(post.likes_count || 0) }}</span>
         </button>
-        <router-link :to="`/posts/${post.id}`" class="btn-icon icon-button ms-3">
+        <router-link :to="`/posts/${post.id}`" class="action-icon">
           <i class="bi bi-chat"></i>
-          <span class="action-count">{{ formatCount(post.comments_count || 0) }}</span>
         </router-link>
-        <div class="flex-fill"></div>
       </div>
 
-      <div class="post-caption mb-2">
-        <span class="fw-bold me-2">{{ post.user.username }}</span>{{ post.caption }}
+      <div class="likes-text fw-bold mb-1" @click="showLikers = true">
+        {{ formatCount(post.likes_count || 0) }} curtidas
       </div>
 
-      <router-link 
-        v-if="post.comments_count > 0" 
-        :to="`/posts/${post.id}`" 
-        class="comments-link small text-muted text-decoration-none d-block mb-2"
-      >
+      <div class="caption-section">
+        <span class="fw-bold me-1">{{ post.user.username }}</span>
+        <span class="caption-text">{{ post.caption }}</span>
+      </div>
+
+      <router-link v-if="post.comments_count > 0" :to="`/posts/${post.id}`" class="comments-link d-block mt-1">
         Ver todos os {{ post.comments_count }} comentários
       </router-link>
 
-      <div class="post-time small text-muted text-uppercase">
-        {{ timeAgo(post.created_at) }}
-      </div>
+      <div class="post-date mt-1">{{ timeAgo(post.created_at) }}</div>
     </div>
 
-    <div class="comment-bar px-3 py-3 border-top">
-      <form @submit.prevent="handleComment" class="d-flex align-items-center gap-2">
+    <div class="comment-footer border-top px-3">
+      <form @submit.prevent="handleComment" class="d-flex align-items-center">
         <input 
           v-model="commentBody" 
           type="text" 
-          class="form-control comment-input" 
+          class="comment-input" 
           placeholder="Adicione um comentário..."
-          :disabled="isSubmittingComment"
         />
         <button 
           type="submit" 
-          class="btn btn-link publish-btn fw-bold" 
+          class="post-btn" 
           :disabled="!commentBody.trim() || isSubmittingComment"
         >
           Publicar
@@ -109,150 +120,113 @@ const handleComment = async () => {
       </form>
     </div>
 
-    <LikersModal 
-      v-if="showLikers" 
-      :postId="post.id" 
-      @close="showLikers = false" 
-    />
+    <LikersModal v-if="showLikers" :postId="post.id" @close="showLikers = false" />
   </div>
 </template>
 
 <style scoped>
-.post-card {
-  background: #ffffff;
-  border: 1px solid #e6e6e6;
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.05);
+.post-container {
+  background: #fff;
+  border: 1px solid #dbdbdb;
+  border-radius: 8px;
+  max-width: 470px; /* Largura padrão do feed do Instagram */
+  margin: 0 auto;
 }
 
-.post-header {
-  padding: 16px;
+/* Header */
+.avatar-ring {
+  padding: 2px;
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  border-radius: 50%;
 }
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  object-fit: cover;
-}
-
-.username {
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #111827;
-}
-
-.user-handle {
-  color: #6b7280;
-}
-
-.btn-options {
-  color: #6b7280;
-}
-
-.post-image {
-  background: #f8fafc;
-}
-
-.post-image img {
-  width: 100%;
-  height: auto;
+.avatar-img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid white;
   display: block;
-  object-fit: cover;
+}
+.username-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #262626;
+}
+.btn-more { background: none; border: none; font-size: 1.1rem; }
+
+/* Imagem e Coração Central */
+.post-image-wrapper {
+  position: relative;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.main-img { width: 100%; display: block; object-fit: contain; }
+
+.central-heart {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 5rem;
+  z-index: 10;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));
 }
 
-.post-body {
-  padding-bottom: 0;
+/* Transição do Coração Central */
+.heart-fade-enter-active { animation: heart-pop-in 0.8s; }
+.heart-fade-leave-active { opacity: 0; transition: opacity 0.2s; }
+
+@keyframes heart-pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  20% { transform: scale(1.2); opacity: 1; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 0; }
 }
 
-.action-row {
-  padding-bottom: 6px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.btn-icon {
+/* Ações */
+.action-icon {
   background: none;
   border: none;
+  font-size: 1.5rem;
   padding: 0;
-  cursor: pointer;
-  line-height: 1;
-  color: #111827;
+  color: #262626;
+}
+.anim-pop {
+  display: inline-block;
+  animation: mini-pop 0.3s cubic-bezier(0.17, 0.89, 0.32, 1.49);
+}
+@keyframes mini-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
-.icon-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
+/* Textos */
+.likes-text { font-size: 0.9rem; cursor: pointer; }
+.caption-text { font-size: 0.9rem; color: #262626; }
+.comments-link { font-size: 0.85rem; color: #8e8e8e; text-decoration: none; }
+.post-date { font-size: 0.65rem; color: #8e8e8e; text-transform: uppercase; }
 
-.action-count {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-.btn-icon i {
-  font-size: 1.35rem;
-}
-
-.btn-icon:active {
-  transform: scale(1.05);
-}
-
-.liked {
-  color: #ef4444;
-}
-
-.likes-summary {
-  display: block;
-  font-weight: 700;
-  color: #111827;
-  background: transparent;
-  border: none;
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
-}
-
-.post-caption {
-  line-height: 1.5;
-  color: #374151;
-}
-
-.comments-link {
-  color: #6b7280;
-}
-
-.post-time {
-  letter-spacing: 0.08em;
-}
-
-.comment-bar {
-  background: #fafafa;
-}
-
+/* Footer Comentário */
+.comment-footer { min-height: 48px; display: flex; align-items: center; }
 .comment-input {
   flex: 1;
-  border: 1px solid #e5e7eb;
-  border-radius: 999px;
-  padding: 10px 16px;
-  min-height: 40px;
-  color: #111827;
-}
-
-.comment-input:focus {
+  border: none;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
-  border-color: #93c5fd;
+  font-size: 0.9rem;
+  padding: 10px 0;
 }
-
-.publish-btn {
-  color: #2563eb;
-  text-transform: uppercase;
-  font-size: 0.85rem;
+.post-btn {
+  background: none;
+  border: none;
+  color: #0095f6;
+  font-weight: 600;
+  font-size: 0.9rem;
 }
+.post-btn:disabled { color: #b2dffc; }
 
-.publish-btn:disabled {
-  opacity: 0.45;
+@media (max-width: 767px) {
+  .post-container { border-radius: 0; border-left: none; border-right: none; }
 }
 </style>
