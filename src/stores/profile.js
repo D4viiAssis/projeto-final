@@ -15,7 +15,6 @@ export const useProfileStore = defineStore('profile', {
         const userRes = await api.get('/auth/me');
         const userData = userRes.data;
 
-        // Buscamos os contadores e posts para garantir que a tela não fique vazia
         const [followersRes, followingRes, postsRes] = await Promise.all([
           api.get(`/users/${userData.id}/followers`),
           api.get(`/users/${userData.id}/following`),
@@ -38,7 +37,6 @@ export const useProfileStore = defineStore('profile', {
         const userRes = await api.get(`/users/${username}`);
         const userData = userRes.data;
 
-        // BUSCA DA VERDADE: Injetamos o que o UserResource do back esquece
         const [followStatus, followersRes, followingRes, postsRes] = await Promise.all([
           api.get(`/users/${userData.id}/is-following`),
           api.get(`/users/${userData.id}/followers`),
@@ -78,7 +76,6 @@ export const useProfileStore = defineStore('profile', {
           if (authStore.user) authStore.user.following_count--;
         }
         
-        // 2. Verificação final para cravar o dado do banco
         const check = await api.get(`/users/${userId}/is-following`);
         this.user.is_following = !!check.data.is_following;
       } catch (error) {

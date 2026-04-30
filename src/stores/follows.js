@@ -4,8 +4,7 @@ import { followsService } from '@/services/follows.service';
 
 export const useFollowsStore = defineStore('follows', () => {
   const followingIds = ref(new Set());
-  const pendingIds = ref(new Set()); // Para estados de carregamento se precisar
-
+  const pendingIds = ref(new Set());
   const isFollowing = (userId) => followingIds.value.has(Number(userId));
 
   const fetchFollowingList = async (viewerId) => {
@@ -22,7 +21,6 @@ export const useFollowsStore = defineStore('follows', () => {
     const id = Number(userId);
     const currentlyFollowing = followingIds.value.has(id);
 
-    // Otimista: Atualiza o Set trocando por uma nova instância (exigência da especificação)
     const newSet = new Set(followingIds.value);
     
     try {
@@ -36,7 +34,6 @@ export const useFollowsStore = defineStore('follows', () => {
         await followsService.followUser(id);
       }
     } catch (error) {
-      // Reverte em caso de erro
       const rollbackSet = new Set(followingIds.value);
       if (currentlyFollowing) rollbackSet.add(id);
       else rollbackSet.delete(id);

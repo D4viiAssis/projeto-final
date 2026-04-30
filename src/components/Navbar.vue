@@ -64,38 +64,32 @@ const handleLogout = async () => {
   overflow: hidden;
 }
 
-/* Layout Desktop (Sidebar que expande) */
 @media (min-width: 768px) {
   .custom-navbar {
     left: 0;
     top: 0;
-    width: 75px; /* Largura fechada */
+    width: 75px; 
     height: 100vh;
   }
-
   .custom-navbar:hover {
     width: 250px; /* Largura aberta */
     box-shadow: 10px 0 20px rgba(0, 0, 0, 0.05);
   }
-
   .nav-links {
     padding: 0 12px;
   }
-
-  /* Controle da Logo */
   .logo-container {
     height: 60px;
     display: flex;
     align-items: center;
     position: relative;
   }
-
   .instagram-logo {
     position: absolute;
     left: 20px;
     font-weight: bold;
     font-size: 1.4rem;
-    opacity: 0; /* Escondida por padrão */
+    opacity: 0;
     transition: opacity 0.2s ease;
     white-space: nowrap;
     background: linear-gradient(to right, #833ab4, #fd1d1d);
@@ -110,11 +104,9 @@ const handleLogout = async () => {
     transition: opacity 0.2s ease;
   }
 
-  /* Quando a barra expande, troca ícone pelo texto da logo */
   .custom-navbar:hover .instagram-logo { opacity: 1; }
   .custom-navbar:hover .logo-icon { opacity: 0; }
 
-  /* Labels (Textos) */
   .label {
     opacity: 0;
     white-space: nowrap;
@@ -127,7 +119,6 @@ const handleLogout = async () => {
   }
 }
 
-/* Itens da Navegação */
 .nav-item {
   display: flex;
   align-items: center;
@@ -157,10 +148,9 @@ const handleLogout = async () => {
 }
 
 .nav-item.router-link-active i {
-  -webkit-text-stroke: 1px black; /* Deixa o ícone "bold" quando ativo */
+  -webkit-text-stroke: 1px black;
 }
 
-/* Estilo Mobile (Barra Inferior) */
 @media (max-width: 767px) {
   .custom-navbar {
     bottom: 0;

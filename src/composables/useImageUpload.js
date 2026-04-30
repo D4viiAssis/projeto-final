@@ -12,7 +12,6 @@ export function useImageUpload(maxSizeMB = 5) {
       return false;
     }
 
-    // Limpa preview anterior se existir
     cleanup();
 
     imageFile.value = file;

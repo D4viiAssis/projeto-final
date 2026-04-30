@@ -13,9 +13,8 @@ const feedStore = useFeedStore();
 const commentBody = ref('');
 const isSubmittingComment = ref(false);
 const showLikers = ref(false);
-const showCentralHeart = ref(false); // Controla o coração gigante no meio
+const showCentralHeart = ref(false);
 
-// Lógica de Double Tap
 let lastTap = 0;
 const handleDoubleTap = () => {
   const now = Date.now();
@@ -23,7 +22,7 @@ const handleDoubleTap = () => {
     if (!props.post.liked_by_me) {
       handleLike();
     }
-    // Sempre mostra a animação do coração no meio no double click
+
     showCentralHeart.value = true;
     setTimeout(() => { showCentralHeart.value = false; }, 1000);
   }
@@ -129,11 +128,10 @@ const handleComment = async () => {
   background: #fff;
   border: 1px solid #dbdbdb;
   border-radius: 8px;
-  max-width: 470px; /* Largura padrão do feed do Instagram */
+  max-width: 470px;
   margin: 0 auto;
 }
 
-/* Header */
 .avatar-ring {
   padding: 2px;
   background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
@@ -153,7 +151,6 @@ const handleComment = async () => {
 }
 .btn-more { background: none; border: none; font-size: 1.1rem; }
 
-/* Imagem e Coração Central */
 .post-image-wrapper {
   position: relative;
   background-color: #fafafa;
@@ -173,7 +170,6 @@ const handleComment = async () => {
   filter: drop-shadow(0 0 10px rgba(0,0,0,0.2));
 }
 
-/* Transição do Coração Central */
 .heart-fade-enter-active { animation: heart-pop-in 0.8s; }
 .heart-fade-leave-active { opacity: 0; transition: opacity 0.2s; }
 
@@ -184,7 +180,6 @@ const handleComment = async () => {
   100% { transform: scale(1.2); opacity: 0; }
 }
 
-/* Ações */
 .action-icon {
   background: none;
   border: none;
@@ -202,13 +197,11 @@ const handleComment = async () => {
   100% { transform: scale(1); }
 }
 
-/* Textos */
 .likes-text { font-size: 0.9rem; cursor: pointer; }
 .caption-text { font-size: 0.9rem; color: #262626; }
 .comments-link { font-size: 0.85rem; color: #8e8e8e; text-decoration: none; }
 .post-date { font-size: 0.65rem; color: #8e8e8e; text-transform: uppercase; }
 
-/* Footer Comentário */
 .comment-footer { min-height: 48px; display: flex; align-items: center; }
 .comment-input {
   flex: 1;

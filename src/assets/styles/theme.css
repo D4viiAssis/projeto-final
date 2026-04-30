@@ -26,7 +26,6 @@ body {
   line-height: 1.5;
 }
 
-/* Útil para acessibilidade, esconde o texto mas mantém para leitores de tela */
 .visually-hidden {
   position: absolute;
   width: 1px;

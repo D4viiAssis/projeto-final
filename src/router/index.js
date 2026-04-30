@@ -9,55 +9,55 @@ import { ROUTE_NAMES } from './routeNames';
     },
   {
     path: '/login',
-    name: ROUTE_NAMES.LOGIN, // <--- Adicionado
+    name: ROUTE_NAMES.LOGIN,
     component: () => import('@/views/auth/LoginView.vue'),
     meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/cadastro',
-    name: ROUTE_NAMES.REGISTER, // <--- Adicionado
+    name: ROUTE_NAMES.REGISTER,
     component: () => import('@/views/auth/CadastroView.vue'),
     meta: { layout: 'AuthLayout', requiresGuest: true }
   },
   {
     path: '/feed',
-    name: ROUTE_NAMES.FEED, // <--- Adicionado
+    name: ROUTE_NAMES.FEED, 
     component: () => import('@/views/app/FeedView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/descobrir',
-    name: ROUTE_NAMES.DISCOVER, // <--- Adicionado
+    name: ROUTE_NAMES.DISCOVER,
     component: () => import('@/views/app/DescubrirView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/criar',
-    name: ROUTE_NAMES.CREATE, // <--- Adicionado
+    name: ROUTE_NAMES.CREATE,
     component: () => import('@/views/app/CriarPostView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil',
-    name: ROUTE_NAMES.PROFILE, // <--- Adicionado
+    name: ROUTE_NAMES.PROFILE,
     component: () => import('@/views/app/PerfilView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil/editar',
-    name: ROUTE_NAMES.EDIT_PROFILE, // <--- O QUE ESTAVA DANDO ERRO!
+    name: ROUTE_NAMES.EDIT_PROFILE,
     component: () => import('@/views/app/EditarPerfilView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/perfil/lista/:type',
-    name: ROUTE_NAMES.PROFILE_CONNECTIONS, // <--- Adicionado
+    name: ROUTE_NAMES.PROFILE_CONNECTIONS, 
     component: () => import('@/views/app/ListaConexoesView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
   {
     path: '/posts/:postId',
-    name: ROUTE_NAMES.POST_DETAILS, // <--- Adicionado
+    name: ROUTE_NAMES.POST_DETAILS,
     component: () => import('@/views/app/PostDetailView.vue'),
     meta: { layout: 'AppLayout', requiresAuth: true }
   },
@@ -72,7 +72,6 @@ const router = createRouter({
   routes
 });
 
-// Guards de Segurança
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   

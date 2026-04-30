@@ -1,26 +1,17 @@
 <script setup>
-
-/*IMPORTAÇÕES: Trazendo as ferramentas necessárias */
-
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth'; 
 import Spinner from '@/components/ui/Spinner.vue'; 
 
-// Instanciando as ferramentas
 const router = useRouter(); 
 const authStore = useAuthStore();
 
-/**
- * ESTADO (DATA): As variáveis que controlam o formulário e a interface
- */
 const email = ref('');
 const password = ref('');
 const isLoading = ref(false)
 const errorMsg = ref('');
 
-/*FUNÇÃO PRINCIPAL: handleLogin
- * É disparada quando o usuário clica no botão ou dá Enter */
 const handleLogin = async () => {
   isLoading.value = true; 
   errorMsg.value = '';

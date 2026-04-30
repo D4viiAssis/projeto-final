@@ -22,11 +22,10 @@ const isSubmitting = ref(false);
 const loadPostData = async () => {
   isLoading.value = true;
   try {
-    // Busca os detalhes do post
+
     const postRes = await api.get(`/posts/${route.params.postId}`);
     post.value = postRes.data;
 
-    // Busca os comentários do post (Rota: GET /posts/{post}/comments)
     const commentsRes = await api.get(`/posts/${route.params.postId}/comments`);
     comments.value = commentsRes.data.data || commentsRes.data;
   } catch (error) {
@@ -39,7 +38,6 @@ const loadPostData = async () => {
 onMounted(loadPostData);
 
 const handleLike = async () => {
-  // Como o post pode não estar no feedById da store, atualizamos localmente primeiro
   const originalLiked = post.value.liked_by_me;
   const originalCount = post.value.likes_count;
 
@@ -173,7 +171,7 @@ const handleDeleteComment = async (commentId) => {
 .btn-icon i { font-size: 1.5rem; }
 .btn-icon:active { transform: scale(1.2); }
 .text-break { word-break: break-word; }
-/* Estilização básica do scroll */
+
 .overflow-auto::-webkit-scrollbar { width: 4px; }
 .overflow-auto::-webkit-scrollbar-thumb { background: #dbdbdb; border-radius: 10px; }
 </style>

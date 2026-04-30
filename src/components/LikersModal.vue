@@ -14,9 +14,7 @@ const isLoading = ref(true);
 
 onMounted(async () => {
   try {
-    // CORREÇÃO DA ROTA: de /likers para /likes conforme seu api.php
     const { data } = await api.get(`/posts/${props.postId}/likes`);
-    // O Laravel costuma envolver em 'data' por causa do Resource
     users.value = data.data || data;
   } catch (error) {
     console.error("Erro ao carregar curtidas:", error);
@@ -33,13 +31,11 @@ onMounted(async () => {
         <div style="width: 32px;"></div> <h6 class="mb-0 fw-bold">Curtidas</h6>
         <button type="button" class="btn-close shadow-none" @click="emit('close')" aria-label="Close"></button>
       </div>
-
       <div class="modal-body p-0 overflow-auto" style="max-height: 400px; min-height: 250px;">
         <div v-if="isLoading" class="text-center py-5">
           <Spinner size="sm" color="primary" />
           <p class="text-muted small mt-2">Carregando...</p>
         </div>
-
         <div v-else-if="users.length > 0">
           <div v-for="user in users" :key="user.id" class="d-flex align-items-center p-3">
             <router-link :to="`/perfil?user=${user.username}`" @click="emit('close')">
@@ -49,20 +45,17 @@ onMounted(async () => {
                 style="width: 44px; height: 44px; object-fit: cover;"
               />
             </router-link>
-            
             <div class="text-start flex-grow-1">
               <router-link :to="`/perfil?user=${user.username}`" @click="emit('close')" class="text-decoration-none text-dark d-block">
                 <span class="fw-bold d-block small lh-1">{{ user.username }}</span>
                 <span class="text-muted small">{{ user.name }}</span>
               </router-link>
             </div>
-
             <button class="btn btn-sm btn-outline-secondary fw-bold px-3 py-1" style="font-size: 0.75rem;">
               Seguir
             </button>
           </div>
         </div>
-
         <div v-else class="text-center py-5">
           <div class="rounded-circle border border-2 d-inline-flex p-3 mb-2">
             <i class="bi bi-heart h3 mb-0 text-muted"></i>
@@ -73,7 +66,6 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
 <style scoped>
 .modal-overlay {
   position: fixed;
@@ -85,7 +77,7 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 2000; /* Garantir que fique acima de tudo */
+  z-index: 2000;
   padding: 20px;
 }
 
