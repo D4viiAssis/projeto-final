@@ -7,7 +7,7 @@ import Spinner from '@/components/ui/Spinner.vue';
 const feedStore = useFeedStore();
 
 onMounted(async () => {
-  // Agora buscamos APENAS o que é real
+  
   await feedStore.fetchFeed();
 });
 </script>
@@ -34,7 +34,7 @@ onMounted(async () => {
         >
           {{ feedStore.isLoading ? 'Carregando mais...' : 'Ver mais postagens' }}
         </button>
-      </div>
+      </div>  
 
       <div v-if="feedStore.feedPosts.length === 0" class="text-center mt-5">
         <i class="bi bi-camera text-muted" style="font-size: 3rem;"></i>

@@ -2,11 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { ROUTE_NAMES } from './routeNames';
 
-const routes = [
-  {
-    path: '/',
-    redirect: '/feed'
-  },
+  const routes = [
+    {
+      path: '/',
+      redirect: '/feed'
+    },
   {
     path: '/login',
     name: ROUTE_NAMES.LOGIN, // <--- Adicionado

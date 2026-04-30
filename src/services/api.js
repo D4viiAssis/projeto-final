@@ -11,7 +11,7 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
-});
+}); 
 
 // Interceptor para tratar erros globais (Ex: Token expirado)
 api.interceptors.response.use(

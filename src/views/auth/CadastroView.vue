@@ -21,9 +21,8 @@ const handleRegister = async () => {
   isLoading.value = true;
   serverErrors.value = {};
   try {
-    // CORREÇÃO: Passando o objeto 'form' completo
     await authStore.register(form);
-    router.push('/feed');
+    router.push('/feed'); 
   } catch (err) {
     if (err.response?.data?.errors) {
       serverErrors.value = err.response.data.errors;

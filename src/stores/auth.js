@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', () => {
   };
 
   const logout = async () => {
-    try {
+    try { 
       await authService.logout();
     } catch (error) {
       // Falha silenciosa
