@@ -1,38 +1,35 @@
-# insta-clone
+InstaClone - Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Este é o frontend do projeto InstaClone, uma Single Page Application (SPA) desenvolvida em Vue.js 3
+que simula as funcionalidades principais do Instagram. O projeto utiliza **Pinia** para gerenciamento de estado e Axios
+para consumo de API.
 
-## Recommended IDE Setup
+Tecnologias utilizadas
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+* Vue 3 (Composition API) - Framework principal.
+* Vite - Build tool e servidor de desenvolvimento ultra-rápido.
+* Pinia - Gerenciamento de estado global (Stores).
+* Vue Router - Navegação entre páginas e guards de segurança.
+* Axios - Cliente HTTP com interceptores para autenticação JWT.
+* Docker - Conteinerização da aplicação.
 
-## Recommended Browser Setup
+Como Executar o Projeto
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+1. Clonar o Repositório
 
-## Customize configuration
+SSH - git clone git@github.com:D4viiAssis/projeto-final.git
+HTTPS - git clone https://github.com/D4viiAssis/projeto-final.git
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+2. Entrar na pasta do projeto
 
-## Project Setup
+cd projeto-final
 
-```sh
-npm install
-```
+3. Subir o ambiente com Docker
 
-### Compile and Hot-Reload for Development
+Certifique-se de que o Docker está rodando e execute:
+docker compose up -d
 
-```sh
-npm run dev
-```
+4. Acessar a aplicação
 
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
+Acesse no seu navegador:
+http://localhost:3000
